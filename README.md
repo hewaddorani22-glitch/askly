@@ -43,7 +43,15 @@ Boost provides your agent 15+ tools and skills that help agents build Laravel ap
 
 ## Vercel Deployment
 
-The app runs on Vercel via the `vercel-php` runtime. Because Vercel functions are stateless and `/tmp` is ephemeral, SQLite cannot be used in production — auth would lose users between cold starts. Set the following env vars in the Vercel project settings:
+The app runs on Vercel via the `vercel-php` runtime. Two modes are supported:
+
+### MVP / demo mode (zero config)
+
+Just deploy — no env vars required. The function falls back to SQLite at `/tmp/askly.sqlite` and auto-runs migrations on every cold start. **Data resets whenever Vercel spins up a new container**, so registered users disappear after a few minutes of inactivity. Fine for live demos where the professor registers and logs in within the same session.
+
+### Persistent mode (production)
+
+Set `DB_HOST` plus the other Postgres credentials and the app uses Supabase Postgres instead:
 
 ```
 APP_KEY=base64:...            # output of `php artisan key:generate --show`
@@ -58,7 +66,7 @@ DB_SEARCH_PATH=askly
 DB_SSLMODE=require
 ```
 
-The database password is found in the Supabase dashboard under Project Settings → Database. Tables are created automatically inside the `askly` schema on the first request (Laravel migrations run on cold start).
+The database password is in the Supabase dashboard under Project Settings → Database. Tables are created automatically inside the `askly` schema on the first request.
 
 ## Contributing
 
