@@ -41,6 +41,25 @@ php artisan boost:install
 
 Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
+## Vercel Deployment
+
+The app runs on Vercel via the `vercel-php` runtime. Because Vercel functions are stateless and `/tmp` is ephemeral, SQLite cannot be used in production — auth would lose users between cold starts. Set the following env vars in the Vercel project settings:
+
+```
+APP_KEY=base64:...            # output of `php artisan key:generate --show`
+APP_URL=https://<your-domain>
+DB_CONNECTION=pgsql
+DB_HOST=aws-1-eu-west-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.qbxrybhrrzzqkfgluohw
+DB_PASSWORD=<supabase db password>
+DB_SEARCH_PATH=askly
+DB_SSLMODE=require
+```
+
+The database password is found in the Supabase dashboard under Project Settings → Database. Tables are created automatically inside the `askly` schema on the first request (Laravel migrations run on cold start).
+
 ## Contributing
 
 Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).

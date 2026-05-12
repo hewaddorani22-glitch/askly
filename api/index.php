@@ -14,8 +14,11 @@ if (getenv('VERCEL')) {
         'SESSION_DRIVER' => 'array',
         'CACHE_STORE' => 'array',
         'QUEUE_CONNECTION' => 'sync',
-        'DB_CONNECTION' => 'sqlite',
-        'DB_DATABASE' => '/tmp/askly.sqlite',
+        'DB_CONNECTION' => 'pgsql',
+        'DB_PORT' => '6543',
+        'DB_DATABASE' => 'postgres',
+        'DB_SEARCH_PATH' => 'askly',
+        'DB_SSLMODE' => 'require',
         'VIEW_COMPILED_PATH' => '/tmp/askly/views',
     ];
 
@@ -31,10 +34,6 @@ if (getenv('VERCEL')) {
         if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
-    }
-
-    if (getenv('DB_CONNECTION') === 'sqlite' && ! file_exists(getenv('DB_DATABASE'))) {
-        touch(getenv('DB_DATABASE'));
     }
 }
 
