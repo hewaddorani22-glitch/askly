@@ -15,6 +15,11 @@ if (getenv('VERCEL')) {
         'QUEUE_CONNECTION' => 'sync',
         'DB_CONNECTION' => 'sqlite',
         'DB_DATABASE' => '/tmp/askly.sqlite',
+        'APP_PACKAGES_CACHE' => '/tmp/askly/packages.php',
+        'APP_SERVICES_CACHE' => '/tmp/askly/services.php',
+        'APP_CONFIG_CACHE' => '/tmp/askly/config.php',
+        'APP_ROUTES_CACHE' => '/tmp/askly/routes.php',
+        'APP_EVENTS_CACHE' => '/tmp/askly/events.php',
         'VIEW_COMPILED_PATH' => '/tmp/askly/views',
     ];
 
