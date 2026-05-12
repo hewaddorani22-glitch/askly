@@ -47,6 +47,9 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
+$request = Request::capture();
+$app->instance('request', $request);
+
 if (getenv('VERCEL') && getenv('ASKLY_SKIP_RUNTIME_MIGRATIONS') !== 'true') {
     $marker = '/tmp/askly/migrated';
 
@@ -56,4 +59,4 @@ if (getenv('VERCEL') && getenv('ASKLY_SKIP_RUNTIME_MIGRATIONS') !== 'true') {
     }
 }
 
-$app->handleRequest(Request::capture());
+$app->handleRequest($request);
