@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/{any?}', function () {
     return view('welcome');
-});
-
-Route::view('/{any}', 'welcome')->where('any', '^(?!api(?:/|$)|sanctum(?:/|$)|storage(?:/|$)|up(?:/|$)).*$');
+})->where('any', '^(?!api(?:/|$)|sanctum(?:/|$)|storage(?:/|$)|up(?:/|$)).*$');

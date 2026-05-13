@@ -11,13 +11,15 @@ use App\Http\Controllers\UpvoteController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// Student routes (Session and Questions via Code or ID)
+// Student/Public routes (no auth required, but optionally resolves user)
 Route::get('/sessions/{id}', [SessionController::class, 'show']);
-Route::get('/sessions/{id}/questions', [QuestionController::class, 'index']);
 Route::post('/sessions/{id}/questions', [QuestionController::class, 'store']);
 Route::post('/questions/{question}/upvote', [UpvoteController::class, 'toggle']);
 
-// Protected routes (Professor)
+// Questions index needs optional auth so professors can see filtered questions
+Route::get('/sessions/{id}/questions', [QuestionController::class, 'index']);
+
+// Protected routes (Professor only)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);

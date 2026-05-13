@@ -22,12 +22,15 @@ class QuestionController extends Controller
         
         $query = Question::where('session_id', $session->id)->withCount('upvotes');
 
+        // Manually resolve authenticated user (route is public, auth is optional)
+        $user = \Illuminate\Support\Facades\Auth::guard('sanctum')->user();
+
         // Only professors can see filtered/dismissed questions
-        if (!$request->user() || $session->professor_id !== $request->user()->id) {
+        if (!$user || $session->professor_id !== $user->id) {
              $query->whereIn('status', ['active', 'pinned', 'answered']);
         }
 
-        $questions = $query->orderByRaw("FIELD(status, 'pinned') DESC")
+        $questions = $query->orderByRaw("CASE WHEN status = 'pinned' THEN 0 ELSE 1 END")
                            ->orderByDesc('upvotes_count')
                            ->orderByDesc('created_at')
                            ->get();
