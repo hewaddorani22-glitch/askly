@@ -1,237 +1,182 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap');
 
 @import "tailwindcss";
 
-
+/* ═══════════════════════════════════════════════════════════════
+   ASKLY DESIGN SYSTEM — Kahoot-Inspired Premium Desktop UI
+   ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Kahoot/Quizlet Vibe: Vibrant, Playful Colors */
-  --primary: #46178f;       /* Deep Kahoot-style Purple */
-  --primary-light: #6C3FC5; 
-  --primary-hover: #321066;
+  /* Core Brand */
+  --primary: #46178f;
+  --primary-light: #7B42C9;
+  --primary-dark: #2E0E63;
+  --primary-glow: rgba(70, 23, 143, 0.35);
 
-  /* Playful Brand Colors for Cards/Accents */
-  --brand-pink: #FF3366;
-  --brand-teal: #00C896;
-  --brand-yellow: #FFB800;
-  --brand-blue: #2B75FF;
+  /* Vivid Accent Palette (Kahoot quad-color energy) */
+  --red: #E21B3C;
+  --blue: #1368CE;
+  --yellow: #D89E00;
+  --green: #26890C;
+  --teal: #00C896;
+  --pink: #FF3355;
+  --orange: #FF6B35;
 
-  /* App Backgrounds - Soft, Airy Pastels */
-  --bg-main: #F4F3F7;       /* Very soft purple/gray for main app background */
-  --bg-card: #FFFFFF;       /* Pure white for cards */
-  --bg-subtle: #EAE6F2;     /* Slightly darker purple/gray for subtle elements */
+  /* Surfaces */
+  --bg-app: #F0EDF5;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #FAFAFE;
+  --bg-dark: #1A0A2E;
+  --bg-dark-card: rgba(255, 255, 255, 0.06);
+  --bg-dark-hover: rgba(255, 255, 255, 0.1);
 
-  /* Text - High Contrast */
-  --text-primary: #1A1A1A;  /* Almost black */
-  --text-secondary: #595959;/* Medium Gray */
-  --text-tertiary: #8C8C8C; /* Light Gray */
-  --text-inverse: #FFFFFF;  /* White */
+  /* Text */
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B6B80;
+  --text-muted: #9E9EB0;
+  --text-inverse: #FFFFFF;
 
-  /* Borders & Shadows - Thick and Playful */
-  --border: #E0E0E0;
-  --border-strong: #CCCCCC;
-  --border-dark: #1A1A1A;   /* For neubrutalist elements if needed */
-  
-  /* Massive Rounded Corners */
-  --radius-sm: 12px;
-  --radius-md: 20px;
-  --radius-lg: 32px;
-  --radius-pill: 9999px;
+  /* Borders */
+  --border-light: #E8E5F0;
+  --border-medium: #D4D0E0;
 
-  /* Playful Shadows */
-  --shadow-sm: 0 4px 0 rgba(0, 0, 0, 0.05); /* Quizlet-style hard subtle shadow */
-  --shadow-md: 0 8px 24px -8px rgba(70, 23, 143, 0.15); /* Soft, colored drop shadow */
-  --shadow-hover: 0 16px 32px -8px rgba(70, 23, 143, 0.25);
-  --shadow-btn: 0 4px 0 rgba(0, 0, 0, 0.2); /* Kahoot-style chunky button shadow */
-  --shadow-btn-hover: 0 2px 0 rgba(0, 0, 0, 0.2);
+  /* Radius */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(26, 10, 46, 0.06);
+  --shadow-md: 0 4px 16px rgba(26, 10, 46, 0.08);
+  --shadow-lg: 0 8px 32px rgba(26, 10, 46, 0.12);
+  --shadow-glow: 0 4px 24px var(--primary-glow);
+  --shadow-card-hover: 0 12px 40px rgba(26, 10, 46, 0.15);
+  --shadow-btn: 0 4px 0 rgba(0, 0, 0, 0.15);
+  --shadow-btn-active: 0 2px 0 rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-* {
+/* ═══ RESET & BASE ═══ */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-app);
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* Strict Typography Hierarchy */
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, .font-display {
   font-family: 'Outfit', sans-serif;
-  font-weight: 800; /* Extra bold for playful look */
-  color: var(--text-primary);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
 }
-
-.text-display { font-size: 4.5rem; letter-spacing: -0.04em; font-weight: 900; }
-.text-h1 { font-size: 3rem; }
-.text-h2 { font-size: 2.25rem; }
-.text-h3 { font-size: 1.5rem; font-weight: 700; }
 
 a {
-  color: var(--primary);
+  color: inherit;
   text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-a:hover {
-  opacity: 0.8;
 }
 
 button {
-  font-family: 'Outfit', sans-serif; /* Buttons use the bold font */
+  font-family: inherit;
   cursor: pointer;
   border: none;
   background: none;
 }
 
-input, textarea {
-  font-family: 'Inter', sans-serif;
+input, textarea, select {
+  font-family: inherit;
 }
 
-/* Layout Spacing Classes (Doubled from before) */
-.p-card { padding: 32px; }
-.p-card-sm { padding: 24px; }
-.gap-mega { gap: 48px; }
-
-/* Chunky Playful Components */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 32px;
-  border-radius: var(--radius-pill);
-  font-weight: 800;
-  font-size: 1.125rem;
-  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy transition */
-  gap: 12px;
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
-.btn-primary {
-  background-color: var(--primary);
-  color: var(--text-inverse);
-  box-shadow: var(--shadow-btn);
-  border: 2px solid transparent;
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-primary:hover {
-  transform: translateY(2px);
-  box-shadow: var(--shadow-btn-hover);
-  background-color: var(--primary-hover);
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.btn-secondary {
-  background-color: var(--bg-card);
-  color: var(--primary);
-  border: 2px solid var(--border);
-  box-shadow: var(--shadow-sm);
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.btn-secondary:hover {
-  transform: translateY(-4px); /* Float up */
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary);
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-icon {
-  padding: 12px;
-  border-radius: 50%;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 200, 150, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(0, 200, 150, 0); }
 }
 
-.btn-icon:hover {
-  transform: scale(1.1) rotate(5deg);
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-.card {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 2px solid transparent;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-hover);
-}
-
-/* Massive Input Fields */
-.input {
-  width: 100%;
-  padding: 18px 24px;
-  border-radius: var(--radius-pill);
-  border: 2px solid var(--border);
-  background-color: var(--bg-card);
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  outline: none;
-}
-
-.input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(70, 23, 143, 0.15);
-  transform: scale(1.02);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
-  font-size: 0.85rem;
-  font-weight: 800;
-  font-family: 'Outfit', sans-serif;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* Animations */
-@keyframes popIn {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.animate-pop {
-  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(40px) rotate(360deg); opacity: 0; }
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s var(--ease-smooth) forwards;
 }
 
-/* Quizlet/Kahoot style question cards */
-.flashcard {
-  background-color: white;
-  border-radius: var(--radius-md);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-  border-bottom: 4px solid var(--border);
-  transition: all 0.2s ease;
+.animate-fade-in {
+  animation: fadeIn 0.4s var(--ease-smooth) forwards;
 }
 
-.flashcard:hover {
-  transform: translateY(-2px);
-  border-bottom-width: 6px;
-  border-bottom-color: var(--primary-light);
+.animate-scale-in {
+  animation: scaleIn 0.35s var(--ease-bounce) forwards;
 }
+
+.animate-slide-down {
+  animation: slideDown 0.3s var(--ease-smooth) forwards;
+}
+
+/* Staggered entrance for lists */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }

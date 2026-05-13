@@ -1,116 +1,172 @@
 <template>
-  <div v-if="!session" class="min-h-screen bg-[#F4F3F7] flex items-center justify-center">
-    <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#46178f] border-t-transparent"></div>
+  <!-- Loading -->
+  <div v-if="!session" class="host-loading">
+    <div class="spinner"></div>
   </div>
 
-  <div v-else class="min-h-screen bg-[#F4F3F7] flex flex-col font-sans">
-    <nav class="bg-white border-b-4 border-gray-200 sticky top-0 z-50" :style="{ borderBottomColor: session.accent_color }">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center gap-4">
-            <router-link to="/dashboard" class="p-2 -ml-2 text-gray-400 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-colors">
-              <ArrowLeft class="w-6 h-6" />
-            </router-link>
-            <h1 class="font-bold text-xl text-gray-900 line-clamp-1">{{ session.title }}</h1>
+  <div v-else class="host-root">
+    <!-- Top Bar -->
+    <nav class="host-nav" :style="{ borderBottomColor: session.accent_color }">
+      <div class="host-nav-inner">
+        <div class="host-nav-left">
+          <router-link to="/dashboard" class="back-btn">
+            <ArrowLeft :size="20" />
+          </router-link>
+          <div class="session-info">
+            <h1 class="session-title">{{ session.title }}</h1>
+            <span v-if="session.is_active" class="live-indicator">
+              <span class="live-dot"></span>
+              Live
+            </span>
           </div>
-          <div class="flex items-center gap-6">
-            <div class="hidden sm:flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-xl">
-              <span class="text-sm font-bold text-gray-500 uppercase tracking-wider">Join Code</span>
-              <span class="text-xl font-black text-gray-900 tracking-widest">{{ session.session_code }}</span>
-            </div>
+        </div>
+        <div class="host-nav-right">
+          <div class="join-code-badge">
+            <span class="jcb-label">JOIN CODE</span>
+            <span class="jcb-value">{{ session.session_code }}</span>
+          </div>
+          <div class="question-counter">
+            <MessageSquare :size="16" />
+            <span>{{ allQuestions.length }}</span>
           </div>
         </div>
       </div>
     </nav>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:px-8 flex gap-6">
-      
-      <!-- Main Question Feed -->
-      <div class="flex-1 space-y-4">
-        <!-- Live Tabs -->
-        <div class="flex gap-2 mb-6">
-          <button @click="currentTab = 'active'" 
-                  class="px-5 py-2.5 rounded-full font-bold text-sm transition-all"
-                  :class="currentTab === 'active' ? 'bg-[#46178f] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'">
-            Live Questions ({{ activeQuestions.length }})
-          </button>
-          <button @click="currentTab = 'filtered'" 
-                  class="px-5 py-2.5 rounded-full font-bold text-sm transition-all"
-                  :class="currentTab === 'filtered' ? 'bg-amber-500 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'">
-            Filtered / Spam ({{ filteredQuestions.length }})
-          </button>
-          <button @click="currentTab = 'dismissed'" 
-                  class="px-5 py-2.5 rounded-full font-bold text-sm transition-all"
-                  :class="currentTab === 'dismissed' ? 'bg-gray-800 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'">
-            Answered / Dismissed ({{ dismissedQuestions.length }})
-          </button>
-        </div>
+    <!-- Main Content -->
+    <main class="host-main">
+      <!-- Sidebar Tabs -->
+      <aside class="host-sidebar">
+        <button
+          @click="currentTab = 'active'"
+          class="sidebar-tab"
+          :class="{ active: currentTab === 'active' }"
+        >
+          <div class="tab-icon" style="background: #46178f;">
+            <MessageSquare :size="16" />
+          </div>
+          <div class="tab-info">
+            <span class="tab-label">Live Questions</span>
+            <span class="tab-count">{{ activeQuestions.length }}</span>
+          </div>
+        </button>
 
-        <div v-if="displayedQuestions.length === 0" class="bg-white rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center mt-8">
-          <MessageSquare class="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 class="text-lg font-bold text-gray-900">No questions in this view</h3>
+        <button
+          @click="currentTab = 'filtered'"
+          class="sidebar-tab"
+          :class="{ active: currentTab === 'filtered' }"
+        >
+          <div class="tab-icon" style="background: #D89E00;">
+            <AlertTriangle :size="16" />
+          </div>
+          <div class="tab-info">
+            <span class="tab-label">Filtered</span>
+            <span class="tab-count">{{ filteredQuestions.length }}</span>
+          </div>
+        </button>
+
+        <button
+          @click="currentTab = 'dismissed'"
+          class="sidebar-tab"
+          :class="{ active: currentTab === 'dismissed' }"
+        >
+          <div class="tab-icon" style="background: #6B6B80;">
+            <Archive :size="16" />
+          </div>
+          <div class="tab-info">
+            <span class="tab-label">Archived</span>
+            <span class="tab-count">{{ dismissedQuestions.length }}</span>
+          </div>
+        </button>
+      </aside>
+
+      <!-- Question Feed -->
+      <div class="question-feed">
+        <!-- Empty State -->
+        <div v-if="displayedQuestions.length === 0" class="feed-empty">
+          <div class="feed-empty-icon">
+            <MessageSquare :size="32" />
+          </div>
+          <h3>{{ currentTab === 'active' ? 'Waiting for questions...' : 'Nothing here' }}</h3>
+          <p v-if="currentTab === 'active'">Share the join code <strong>{{ session.session_code }}</strong> with your students</p>
         </div>
 
         <!-- Question Cards -->
-        <div v-for="q in displayedQuestions" :key="q.id" 
-             class="bg-white rounded-2xl p-6 shadow-sm border-2 transition-all relative"
-             :class="{
-               'border-amber-400 ring-4 ring-amber-400/10': q.status === 'pinned', 
-               'border-transparent hover:border-gray-200': q.status !== 'pinned'
-             }">
-             
-          <div class="flex gap-5">
-            <!-- Upvotes -->
-            <div class="flex flex-col items-center min-w-[64px] h-20 rounded-xl bg-gray-50 border-2 border-gray-100 justify-center">
-              <span class="font-black text-2xl text-gray-900 leading-none">{{ q.upvote_count }}</span>
-              <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1">Votes</span>
+        <div
+          v-for="(q, index) in displayedQuestions"
+          :key="q.id"
+          class="question-card"
+          :class="{
+            'is-pinned': q.status === 'pinned',
+            'is-filtered': q.status === 'filtered'
+          }"
+          :style="{ animationDelay: `${index * 0.04}s` }"
+        >
+          <!-- Vote Column -->
+          <div class="vote-col">
+            <span class="vote-count">{{ q.upvotes_count ?? q.upvote_count }}</span>
+            <span class="vote-label">votes</span>
+          </div>
+
+          <!-- Content -->
+          <div class="question-content">
+            <!-- Tags -->
+            <div v-if="q.status === 'filtered' || q.is_duplicate" class="question-tags">
+              <span v-if="q.status === 'filtered'" class="qtag qtag-red">
+                {{ q.filter_reason?.replace('_', ' ') || 'Filtered' }}
+              </span>
+              <span v-if="q.is_duplicate" class="qtag qtag-purple">
+                Duplicate
+              </span>
             </div>
 
-            <div class="flex-1">
-              <!-- Meta/Tags -->
-              <div class="flex items-center gap-2 mb-2">
-                <span v-if="q.status === 'filtered'" class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded uppercase tracking-wider">
-                  {{ q.filter_reason?.replace('_', ' ') }}
-                </span>
-                <span v-if="q.is_duplicate" class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded uppercase tracking-wider">
-                  Duplicate
-                </span>
-              </div>
-              
-              <p class="text-xl font-bold text-gray-900 leading-snug mb-4">{{ q.content }}</p>
-              
-              <!-- Professor Controls -->
-              <div class="flex gap-2">
-                <template v-if="currentTab === 'active'">
-                  <button @click="updateStatus(q.id, q.status === 'pinned' ? 'active' : 'pinned')" 
-                          class="px-4 py-2 rounded-xl font-bold text-sm transition-colors border"
-                          :class="q.status === 'pinned' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-white text-amber-600 border-amber-200 hover:bg-amber-50'">
-                    <Pin class="w-4 h-4 inline mr-1" /> {{ q.status === 'pinned' ? 'Unpin' : 'Pin to Top' }}
-                  </button>
-                  <button @click="updateStatus(q.id, 'answered')" class="px-4 py-2 bg-green-100 text-green-700 hover:bg-green-200 border border-green-200 rounded-xl font-bold text-sm transition-colors">
-                    <Check class="w-4 h-4 inline mr-1" /> Mark Answered
-                  </button>
-                  <button @click="updateStatus(q.id, 'dismissed')" class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 rounded-xl font-bold text-sm transition-colors">
-                    <Trash2 class="w-4 h-4 inline mr-1" /> Dismiss
-                  </button>
-                </template>
+            <p class="question-text">{{ q.content }}</p>
 
-                <template v-else-if="currentTab === 'filtered'">
-                   <button @click="updateStatus(q.id, 'active')" class="px-4 py-2 bg-green-100 text-green-700 hover:bg-green-200 border border-green-200 rounded-xl font-bold text-sm transition-colors">
-                    <Check class="w-4 h-4 inline mr-1" /> Approve Question
-                  </button>
-                  <button @click="updateStatus(q.id, 'dismissed')" class="px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 border border-red-200 rounded-xl font-bold text-sm transition-colors">
-                    <Trash2 class="w-4 h-4 inline mr-1" /> Delete Permanently
-                  </button>
-                </template>
+            <!-- Actions -->
+            <div class="question-actions">
+              <template v-if="currentTab === 'active'">
+                <button
+                  @click="updateStatus(q.id, q.status === 'pinned' ? 'active' : 'pinned')"
+                  class="q-action"
+                  :class="{ 'q-action-active': q.status === 'pinned' }"
+                >
+                  <Pin :size="14" />
+                  <span>{{ q.status === 'pinned' ? 'Unpin' : 'Pin' }}</span>
+                </button>
+                <button @click="updateStatus(q.id, 'answered')" class="q-action q-action-green">
+                  <Check :size="14" />
+                  <span>Answered</span>
+                </button>
+                <button @click="updateStatus(q.id, 'dismissed')" class="q-action q-action-muted">
+                  <X :size="14" />
+                  <span>Dismiss</span>
+                </button>
+              </template>
 
-                <template v-else>
-                   <button @click="updateStatus(q.id, 'active')" class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 rounded-xl font-bold text-sm transition-colors">
-                    <RotateCcw class="w-4 h-4 inline mr-1" /> Restore to Live
-                  </button>
-                </template>
-              </div>
+              <template v-else-if="currentTab === 'filtered'">
+                <button @click="updateStatus(q.id, 'active')" class="q-action q-action-green">
+                  <Check :size="14" />
+                  <span>Approve</span>
+                </button>
+                <button @click="updateStatus(q.id, 'dismissed')" class="q-action q-action-red">
+                  <Trash2 :size="14" />
+                  <span>Delete</span>
+                </button>
+              </template>
+
+              <template v-else>
+                <button @click="updateStatus(q.id, 'active')" class="q-action">
+                  <RotateCcw :size="14" />
+                  <span>Restore</span>
+                </button>
+              </template>
             </div>
+          </div>
+
+          <!-- Pinned indicator -->
+          <div v-if="q.status === 'pinned'" class="pinned-badge">
+            <Pin :size="12" />
+            Pinned
           </div>
         </div>
       </div>
@@ -121,7 +177,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { ArrowLeft, MessageSquare, Pin, Check, Trash2, RotateCcw } from 'lucide-vue-next';
+import { ArrowLeft, MessageSquare, Pin, Check, X, Trash2, RotateCcw, AlertTriangle, Archive } from 'lucide-vue-next';
 import api from '../api';
 
 const route = useRoute();
@@ -157,24 +213,18 @@ const displayedQuestions = computed(() => {
 
 const updateStatus = async (questionId, status) => {
   try {
-    // Optimistic update
     const qIndex = allQuestions.value.findIndex(q => q.id === questionId);
-    if (qIndex > -1) {
-      allQuestions.value[qIndex].status = status;
-    }
-    
+    if (qIndex > -1) allQuestions.value[qIndex].status = status;
     await api.patch(`/questions/${questionId}/status`, { status });
-    // Reload to ensure order and consistency
     loadData();
   } catch (err) {
     alert('Failed to update status');
-    loadData(); // revert
+    loadData();
   }
 };
 
 onMounted(() => {
   loadData();
-  // Live polling for Professor dashboard
   pollInterval = setInterval(loadData, 3000);
 });
 
@@ -182,3 +232,408 @@ onUnmounted(() => {
   if (pollInterval) clearInterval(pollInterval);
 });
 </script>
+
+<style scoped>
+.host-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F0EDF5;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #E8E5F0;
+  border-top-color: #46178f;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.host-root {
+  min-height: 100vh;
+  background: #F0EDF5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══ NAV ═══ */
+.host-nav {
+  background: white;
+  border-bottom: 4px solid #46178f;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.host-nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 28px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.host-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-btn {
+  padding: 8px;
+  border-radius: 10px;
+  color: #6B6B80;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: #F5F3FA;
+  color: #1A1A2E;
+}
+
+.session-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.session-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1A2E;
+}
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(38, 137, 12, 0.08);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #26890C;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #26890C;
+  animation: pulse-glow 2s ease infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(38, 137, 12, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(38, 137, 12, 0); }
+}
+
+.host-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.join-code-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #F5F3FA;
+  border-radius: 12px;
+}
+
+.jcb-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #9E9EB0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.jcb-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1A2E;
+  letter-spacing: 0.15em;
+}
+
+.question-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #F5F3FA;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #6B6B80;
+}
+
+/* ═══ MAIN LAYOUT ═══ */
+.host-main {
+  flex: 1;
+  display: flex;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 28px;
+  gap: 24px;
+}
+
+/* ═══ SIDEBAR ═══ */
+.host-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: sticky;
+  top: 88px;
+  align-self: flex-start;
+}
+
+.sidebar-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: white;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.sidebar-tab:hover {
+  border-color: #E8E5F0;
+}
+
+.sidebar-tab.active {
+  border-color: #46178f;
+  background: white;
+  box-shadow: 0 4px 16px rgba(70, 23, 143, 0.08);
+}
+
+.tab-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.tab-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A1A2E;
+}
+
+.tab-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9E9EB0;
+}
+
+/* ═══ QUESTION FEED ═══ */
+.question-feed {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feed-empty {
+  text-align: center;
+  padding: 80px 32px;
+  background: white;
+  border-radius: 20px;
+  border: 2px dashed #D4D0E0;
+}
+
+.feed-empty-icon {
+  width: 64px;
+  height: 64px;
+  background: #F5F3FA;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: #9E9EB0;
+}
+
+.feed-empty h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 8px;
+}
+
+.feed-empty p {
+  font-size: 14px;
+  color: #6B6B80;
+  font-weight: 500;
+}
+
+.feed-empty strong {
+  font-family: 'JetBrains Mono', monospace;
+  color: #46178f;
+  letter-spacing: 0.1em;
+}
+
+/* ═══ QUESTION CARDS ═══ */
+.question-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  gap: 20px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  position: relative;
+  animation: fadeInUp 0.3s ease forwards;
+  opacity: 0;
+}
+
+.question-card:hover {
+  border-color: #E8E5F0;
+  box-shadow: 0 4px 16px rgba(26, 10, 46, 0.06);
+}
+
+.question-card.is-pinned {
+  border-color: #D89E00;
+  background: #FFFDF5;
+}
+
+.question-card.is-filtered {
+  border-color: #FECACA;
+  background: #FFFBFB;
+}
+
+.vote-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 56px;
+  background: #F5F3FA;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.vote-count {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1A1A2E;
+  line-height: 1;
+}
+
+.vote-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #9E9EB0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.question-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.question-tags {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.qtag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.qtag-red { background: #FEF2F2; color: #E21B3C; }
+.qtag-purple { background: #F5F0FF; color: #7B42C9; }
+
+.question-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1A1A2E;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.question-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.q-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B6B80;
+  background: #F5F3FA;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.q-action:hover { border-color: #D4D0E0; color: #1A1A2E; }
+.q-action-active { background: #FFF8E1; color: #D89E00; border-color: #D89E00; }
+.q-action-green:hover { background: #F0FFF4; color: #26890C; border-color: #26890C; }
+.q-action-red:hover { background: #FEF2F2; color: #E21B3C; border-color: #E21B3C; }
+.q-action-muted:hover { background: #F5F3FA; }
+
+.pinned-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 14px;
+  background: #D89E00;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 0 14px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
